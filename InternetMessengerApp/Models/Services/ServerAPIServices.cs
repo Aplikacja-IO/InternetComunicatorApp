@@ -10,14 +10,11 @@ using System.Threading.Tasks;
 
 namespace InternetMessengerApp.Models.Services
 {
-    public class ServerAPIServices : IDisposable
+    public class ServerAPIServices
     {
         string baseUrl = "https://localhost:44369/"; //tymczasowe, tutaj idzie adres serwera
 
-        public void Dispose()
-        {
-            throw new NotImplementedException();
-        }
+
 
         public async Task<string> GetUserJWTToken(UserInfo userInfo)
         {
@@ -32,9 +29,12 @@ namespace InternetMessengerApp.Models.Services
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json'"));
             HttpResponseMessage responseMessage = await client.PostAsync("/api/Token", byteContent);
 
-            string token = responseMessage.Content.ReadAsStringAsync().Result;
-
-            return token;
+            if (responseMessage.IsSuccessStatusCode)
+            {
+                string token = responseMessage.Content.ReadAsStringAsync().Result;
+                return token;
+            }
+            return "Nieprawidlowe poswiadczenia";
         }
     }
 }

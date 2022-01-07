@@ -38,11 +38,12 @@ namespace InternetMessengerApp.Controllers
         public async Task<IActionResult> Login(LoginModel loginModel)
         {
             var user = loginModel.User;
-            using var server = new ServerAPIServices();
+            var server = new ServerAPIServices();
             string token = await server.GetUserJWTToken(user);
             if(token == "Nieprawidlowe poswiadczenia")
             {
-                return View(user);
+                ViewBag.Failedcount = token;
+                return View(loginModel);
             }
             return RedirectToAction("UserDashboard");
 
