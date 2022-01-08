@@ -1,6 +1,7 @@
 ﻿using InternetMessengerApp.Models;
 using InternetMessengerApp.Models.Helpers;
 using InternetMessengerApp.Models.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -39,18 +40,20 @@ namespace InternetMessengerApp.Controllers
         {
             var user = loginModel.User;
             var server = new ServerAPIServices();
-            string token = await server.GetUserJWTToken(user);
-            if(token == "Nieprawidlowe poswiadczenia")
+            var _token = await server.GetUserJWTToken(user);
+            if(_token == "Nieprawidlowe poswiadczenia")
             {
-                ViewBag.Failedcount = token;
+                ViewBag.Failedcount = _token;
                 return View(loginModel);
             }
-            return RedirectToAction("UserDashboard");
+            return RedirectToAction("UserDashboard", new { userId = user.userId, token = _token }) ;
 
         }
-        public IActionResult UserDashboard()
+        public async Task<IActionResult> UserDashboard(int userId, string token)
         {
-            return View();
+            var userDasboardModel = new UserDashboardModel(userId, token);
+            await userDasboardModel.GetAllUserGroups();
+            return View(userDasboardModel);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
