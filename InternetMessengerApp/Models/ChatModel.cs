@@ -14,9 +14,14 @@ namespace InternetMessengerApp.Models
         HubConnection connection;
         Dictionary<string, string> chatMessages;
         List<string> errorMessage;
-        
+        public ChatModel()
+        {
+            chatMessages = new Dictionary<string, string>();
+            errorMessage = new List<string>();
+        }
         private void CreateConnectionForUserWithToken(RegisterUser user, string tokenString)
         {
+            var userId = user.UserId;
             connection = new HubConnectionBuilder()
                 .WithUrl($"https://localhost:44369/ChatHub?userId={userId}", options =>
                 {
@@ -46,6 +51,18 @@ namespace InternetMessengerApp.Models
             catch (Exception ex)
             {
                 errorMessage.Add(ex.Message);
+            }
+        }
+        public async void SendMessage(string fromAuthorIdString, string toParentGroupIdString, string postText)
+        {
+            try
+            {
+                await connection.InvokeAsync("SendPost",
+                    fromAuthorIdString, toParentGroupIdString, postText);
+            }
+            catch (Exception e)
+            {
+                errorMessage.Add(e.Message);
             }
         }
     }
