@@ -9,12 +9,18 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.SignalR.Client;
 
 namespace InternetMessengerApp.Models.Services
 {
     public class ServerAPIServices
     {
+
         string baseUrl = "https://localhost:44369/"; //tymczasowe, tutaj idzie adres serwera
+        public ServerAPIServices()
+        {
+
+        }
 
         public async Task<string> GetUserJWTToken(UserInfo userInfo)
         {
