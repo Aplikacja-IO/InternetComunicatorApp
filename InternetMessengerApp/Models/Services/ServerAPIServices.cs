@@ -17,9 +17,12 @@ namespace InternetMessengerApp.Models.Services
     {
 
         string baseUrl = "https://localhost:44369/"; //tymczasowe, tutaj idzie adres serwera
+        private HttpClient client;
         public ServerAPIServices()
         {
-
+            client = new HttpClient();
+            client.BaseAddress = new Uri(baseUrl);
+            client.DefaultRequestHeaders.Clear();
         }
 
         public async Task<string> GetUserJWTToken(UserInfo userInfo)
@@ -29,9 +32,6 @@ namespace InternetMessengerApp.Models.Services
             var byteContent = new ByteArrayContent(buffer);
             byteContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-            using var client = new HttpClient();
-            client.BaseAddress = new Uri(baseUrl);
-            client.DefaultRequestHeaders.Clear();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json'"));
             HttpResponseMessage responseMessage = await client.PostAsync("/api/Token", byteContent);
 
@@ -44,17 +44,28 @@ namespace InternetMessengerApp.Models.Services
         }
         public async Task<List<Group>> GetAllUserGroupsAsync(int userId, string token)
         {
-            using var client = new HttpClient();
-            client.BaseAddress = new Uri(baseUrl);
-            client.DefaultRequestHeaders.Clear();
-            client.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue("Bearer", token);
+            SetAuthorization(token);
             HttpResponseMessage responseMessage = await client.GetAsync($"/api/Group/AllUserGroups/{userId}");
 
             var jsonObjectGroups = responseMessage.Content.ReadAsStringAsync().Result;
 
             var groups = Newtonsoft.Json.JsonConvert.DeserializeObject<List<Group>>(jsonObjectGroups);
             return groups;
+        }
+        public async Task<Post> GetPostById(int postId, string token)
+        {
+            SetAuthorization(token);
+            var responseMessage = await client.GetAsync($"/api/Post/GetPostById/{postId}");
+
+            var jsonObjectPost = responseMessage.Content.ReadAsStringAsync().Result;
+
+            var post = Newtonsoft.Json.JsonConvert.DeserializeObject<Post>(jsonObjectPost);
+            return post;
+        }
+        private void SetAuthorization(string token)
+        {
+            client.DefaultRequestHeaders.Authorization =
+                   new AuthenticationHeaderValue("Bearer", token);
         }
     }
 }
