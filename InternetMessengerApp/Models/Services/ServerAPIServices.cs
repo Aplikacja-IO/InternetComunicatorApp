@@ -18,6 +18,8 @@ namespace InternetMessengerApp.Models.Services
 
         string baseUrl = "https://localhost:44369/"; //tymczasowe, tutaj idzie adres serwera
         private HttpClient client;
+
+      
         public ServerAPIServices()
         {
             client = new HttpClient();
@@ -62,6 +64,17 @@ namespace InternetMessengerApp.Models.Services
             var post = Newtonsoft.Json.JsonConvert.DeserializeObject<Post>(jsonObjectPost);
             return post;
         }
+        public async Task<RegisterUser> GetUserById(int userId, string token)
+        {
+            SetAuthorization(token);
+            var responseMessage = await client.GetAsync($"/api/RegisterUser/{userId}");
+
+            var jsonObjectUser = responseMessage.Content.ReadAsStringAsync().Result;
+
+            var user = Newtonsoft.Json.JsonConvert.DeserializeObject<RegisterUser>(jsonObjectUser);
+            return user;
+        }
+
         private void SetAuthorization(string token)
         {
             client.DefaultRequestHeaders.Authorization =
